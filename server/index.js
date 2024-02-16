@@ -74,6 +74,35 @@ app.post("/users", (req, res) => {
   });
 });
 
+app.get("/authenticate", (req, res) => {
+  const { username, password } = req.body;
+
+  const sql = `SELECT * FROM users WHERE username = ?`;
+
+  db.query(sql, [username], async (err, data) => {
+    if (err) {
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+
+    if (data.length === 0) {
+      res.status(400).json({ error: "User not found" });
+      return;
+    }
+
+    const user = data[0];
+
+    const match = await bcrypt.compare(password, user.password);
+
+    if (match) {
+      const { id, username, email } = data[0];
+      res.json({ id, username, email });
+    } else {
+      res.status(401).json({ error: "Authentication failed" });
+    }
+  });
+});
+
 // END ALL QUERY
 
 process.on("SIGINT", () => {
