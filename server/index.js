@@ -77,9 +77,20 @@ app.post("/users", (req, res) => {
 app.get("/authenticate", (req, res) => {
   const { username, password } = req.body;
 
+  // Log start time
+  const startTime = new Date();
+
   const sql = `SELECT * FROM users WHERE username = ?`;
 
   db.query(sql, [username], async (err, data) => {
+    // Log end time
+    const endTime = new Date();
+
+    // Calculate duration in milliseconds
+    const queryTime = endTime - startTime;
+
+    console.log(`Query execution time: ${queryTime}ms`);
+
     if (err) {
       res.status(500).json({ error: "Internal Server Error" });
       return;
@@ -101,6 +112,11 @@ app.get("/authenticate", (req, res) => {
       res.status(401).json({ error: "Authentication failed" });
     }
   });
+});
+
+app.get("/test/:id/:anotherid", (req, res) => {
+  const { id, anotherid } = req.params;
+  res.json(`${id}, ${anotherid}`);
 });
 
 // END ALL QUERY
